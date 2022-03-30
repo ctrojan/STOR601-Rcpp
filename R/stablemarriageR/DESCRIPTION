@@ -1,0 +1,12 @@
+Package: stablemarriageR
+Type: Package
+Title: Solves the stable marriage problem.
+Version: 1.0
+Date: 2022-03-11
+Author: Connie Trojan
+Maintainer: Connie Trojan <c.trojan1@lancaster.ac.uk>
+Description: Package implementing the fundamental algorithm to solve the stable marriage problem, as described in 'Stable Marriage and Its Relation to Other Combinatorial Problems : An Introduction to the Mathematical Analysis of Algorithms' by Donald E. Knuth and Martin Goldstein.
+License: GPL (>= 2)
+Imports: Rcpp (>= 1.0.8), assertive (>= 0.3-6)
+LinkingTo: Rcpp
+RoxygenNote: 7.1.2
