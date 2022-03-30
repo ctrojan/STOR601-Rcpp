@@ -1,6 +1,6 @@
 # STOR-601 - Interfacing R and C++
 
-Code for the STOR-601 - Interfacing R and C++ assessment. Consists of an [R markdown document](https://htmlpreview.github.io/?https://github.com/ctrojan/STOR601-Rcpp/main/Interfacing-R-and-C%2B%2B---assessment.html) presenting the solutions, alongside the scripts used and their original outputs in csv format.
+Code for [the STOR-601 - Interfacing R and C++ assessment](http://www.mathsbox.com/interfacing-r-and-c++/index.html). Consists of an [R markdown document](https://htmlpreview.github.io/?https://github.com/ctrojan/STOR601-Rcpp/main/Interfacing-R-and-C%2B%2B---assessment.html) presenting the solutions, alongside the scripts used and their original outputs in csv format.
 
 ## Overview
 
@@ -33,3 +33,5 @@ R
     - `Rcpp == 1.0.8`
     - `assertive == 0.3-6`
     
+
+
