@@ -19,8 +19,6 @@ This repository is organised as follows:
     - `/stablemarriageR` - the R package implementing the stable marriage problem with Rcpp
     - `/results` - containts the results of the Rcpp execution time test
     
-- `/test_tables`
-    
 
 ## Requirements
 
