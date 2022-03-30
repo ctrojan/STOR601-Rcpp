@@ -9,7 +9,6 @@ Install by running the command `devtools::install_github("ctrojan/STOR601-Rcpp/R
 
 The code was written and tested with:
 
-R
 - `R == 3.6.3`
     - `devtools == 2.4.3`
     - `Rcpp == 1.0.8`
