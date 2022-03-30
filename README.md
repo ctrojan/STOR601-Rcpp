@@ -4,7 +4,9 @@ Code for the [STOR-601 - Interfacing R and C++ assessment](http://www.mathsbox.c
 
 ## Overview
 
-The solutions to all of the tasks in this assessment are presented in [Interfacing-R-and-C++---assessment.html](https://htmlpreview.github.io/?https://github.com/ctrojan/STOR601-Rcpp/main/Interfacing-R-and-C%2B%2B---assessment.html). The R package written for task 1 is hosted in [ctrojan/R/stablemarriageR](https://github.com/ctrojan/STOR601-Rcpp/tree/main/R/stablemarriageR). This repository is organised as follows:
+The solutions to all of the tasks in this assessment are presented in [Interfacing-R-and-C++---assessment.html](https://htmlpreview.github.io/?https://github.com/ctrojan/STOR601-Rcpp/main/Interfacing-R-and-C%2B%2B---assessment.html). The R package written for task 1 is hosted in [ctrojan/R/stablemarriageR](https://github.com/ctrojan/STOR601-Rcpp/tree/main/R/stablemarriageR). 
+
+This repository is organised as follows:
 
 - `/python`
     - `gen_test_tables.py` - the script used to generate the pairs of preference tables for the execution time test
