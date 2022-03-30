@@ -205,7 +205,7 @@ The Rcpp implementation is actually slower for $n \leq 400$ - this makes sense: 
 
 ### R package implementation
 
-<b>Summary</b>: the package is very similar to the one I wrote for the python assignment, and should be very easy to reuse. It has some external dependencies, although these should be installed at the correct versions when the package is installed so no additional effort should be required from the user. The results in this file may be difficult to reproduce, however - runtimes will vary and while the test tables and original results are provided in this repository, reproducing them requires being able to run the python scripts. 
+<b>Summary</b>: the package is very similar to the one I wrote for the python assignment, and should be very easy to reuse. It has some external dependencies, although these should be installed at the correct versions when the package is installed so no additional effort should be required from the user. The results in this file may be difficult to reproduce, however - runtimes will vary and while the original results are provided in this repository, reproducing them requires being able to run the python scripts. 
 
 - <b> Re-runnable (4.5)</b>: The dependencies are installed automatically when the package is installed, making it easy to create an environment where the code can be run. Note that the minimum version numbers are specified to avoid conflict with other newer packages, so major changes to the dependencies may make this code unrunnable without user intervention to install the exact versions used in testing.
   
