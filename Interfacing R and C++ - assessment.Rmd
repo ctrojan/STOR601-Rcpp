@@ -1,0 +1,222 @@
+---
+title: "STOR-601 - Interfacing R and C++"
+author: "Connie Trojan"
+date: "17 March 2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+help_console <- function(topic, package,
+                         format=c("text", "html", "latex", "Rd"),
+                         before=NULL, after=NULL) {
+  # topic - the command for which help is required
+  # package - the package name with the required topic
+  # format - output format
+  # before - place code before the output e.g. "<blockquote>"
+  # after - place code after the output e.g. "</blockquote>"
+
+  # based on code by Noam Ross
+  #  http://www.noamross.net/archives/2013-06-18-helpconsoleexample/
+  # Stéphane Laurent
+  #  https://stackoverflow.com/questions/60468080/
+  #   print-an-r-help-file-vignette-as-output-into-an-r-html-notebook
+  # and Michael Sumner (mdsumner)
+  #  https://stackoverflow.com/questions/7495685/
+  #   how-to-access-the-help-documentation-rd-source-files-in-r
+
+  format <- match.arg(format)
+  if (!is.character(topic)) topic <- deparse(substitute(topic))
+  db <- tools::Rd_db(package)
+  helpfile <- db[paste0(topic, ".Rd")][[1]]
+
+  hs <- capture.output(
+    switch(
+      format,
+      text = tools::Rd2txt(helpfile),
+      html = tools::Rd2HTML(
+        helpfile,
+        package = "",
+        stages = c("install", "render")
+      ),
+      latex = tools::Rd2latex(helpfile),
+      Rd = tools:::prepare_Rd(helpfile)
+    )
+  )
+  if (format == "html") {
+    i <- grep("<body>", hs)
+    j <- grep("</body>", hs)
+    hs <- hs[(i+1):(j-1)]
+  }
+  hs <- c(before, hs, after)
+  hs <- cat(hs, sep = "\n")
+  invisible(hs)
+}
+
+```
+
+<br />
+<br />
+
+## Task 1) Use Rcpp to create an R package that integrates your C++ implementation of the "fundamental algorithm" you created for Task 1 of the assessment for STOR-601 "C++ for Python Programmers".
+  
+<br />
+
+The package is hosted at [`ctrojan/STOR601-Rcpp/R/stablemarriageR`](https://github.com/ctrojan/STOR601-Rcpp/tree/main/R/stablemarriageR), and can be installed by running the command `devtools::install_github("ctrojan/STOR601-Rcpp/R/stablemarriageR")`.
+
+```{r}
+library(stablemarriageR)
+```
+<br />
+The main function provided by the package is `stablemarriage()`, which solves a given instance of the stable marriage problem:
+
+```{r, echo = FALSE, results = "asis"}
+help_console("stablemarriage", "stablemarriageR", format = "html", before = "<blockquote>", after = "</blockquote>")
+```
+<br />
+Example usage:
+
+```{r}
+pref1 = data.frame(
+    'A' = c('c','b','d','a'),
+    'B' = c('b','a','c','d'),
+    'C' = c('b','d','a','c'),
+    'D' = c('c','a','d','b'),
+     stringsAsFactors = FALSE)
+
+pref2 = data.frame(
+    'a' = c('A','B','D','C'),
+    'b' = c('C','A','D','B'),
+    'c' = c('C','B','D','A'),
+    'd' = c('B','A','C','D'),
+    stringsAsFactors = FALSE)
+
+stab = stablemarriage(colnames(pref1), colnames(pref2), pref1, pref2)
+```
+<br />
+The object returned is of the S4 class `stablemarriageclass` implemented in this package:
+```{r}
+stab
+```
+<br />
+The matching can be retrieved as a dataframe:
+```{r}
+stab@matching
+```
+
+<br />
+
+By default, the `stablemarriage()` function performs input validation using the `assertive` package:
+
+```{r, error=TRUE}
+# Group sizes do not match
+stab = stablemarriage(c('A','B','C'), colnames(pref2), pref1, pref2)
+```
+<br />
+```{r, error=TRUE}
+# Group 1 has an empty string
+stab = stablemarriage(c('d','','f','g'), colnames(pref2), pref1, pref2)
+```
+<br />
+```{r, error=TRUE}
+# The names in group 1 do not match the preference tables
+stab = stablemarriage(c('d','e','f','g'), colnames(pref2), pref1, pref2)
+```
+
+<br />
+<br />
+
+## Task 2) Compare the run times of your Rcpp version of the "fundamental algorithm" with the runtimes of the Python implementation you created for the assessment in STOR-601 "Introductory Python". 
+  
+<br />
+
+Random test tables from size $n=4$ to $n=5000$ were generated using the [`gen_test_tables.py`](https://github.com/ctrojan/STOR601-Rcpp/blob/main/python/gen_test_tables.py) script and saved to `/test_tables` so that the two implementations could be tested on the same set of preference tables. The implementations were run and timed using the [`execution_time_test.py`](https://github.com/ctrojan/STOR601-Rcpp/blob/main/python/execution_time_test.py) and [`execution_time_test.R`](https://github.com/ctrojan/STOR601-Rcpp/blob/main/R/execution_time_test.R) scripts and the results saved to `/python/results` and `/R/results` respectively. 
+
+<br />
+
+In each case only the implementation of the fundamental algorithm was timed: in python this involved timing only the `.find_stable_matching()` method and in R the `stablemarriage` function was run without input validation by setting `validate_inputs = FALSE`.
+
+<br />
+
+The average time taken over 10 replications for each implementation are plotted below:
+```{r, echo=FALSE}
+res_python <- read.csv("python/results/execution_time.csv")
+res_R <- read.csv("R/results/execution_time.csv")
+
+plot(res_python$n, res_python$t, type="l", col="orangered", xlab="n", ylab="Time (s)")
+lines(res_R$n, res_R$t, col="blue")
+legend("topleft", legend=c("Python", "Rcpp"), col=c("orangered", "blue"), lty=1)
+```
+
+The run times are very similar up to $n=1000$, and thereafter the python implementation slows down much faster than the Rcpp implementation.
+
+<br />
+
+Plotting on a log scale gives a clearer comparison across all values of $n$:
+```{r, echo=FALSE}
+plot(res_python$n, log(res_python$t), type="l", col="orangered", xlab="n", ylab="Log time (s)")
+lines(res_R$n, log(res_R$t), col="blue")
+legend("bottomright", legend=c("Python", "Rcpp"), col=c("orangered", "blue"), lty=1)
+```
+
+The Rcpp implementation is actually slower for $n \leq 400$ - this makes sense: while the C++ implementation is likely still faster than the python implementation, invoking it from R incurrs an additional computational cost that outweighs the time saving for small values of $n$.
+
+<br />
+<br />
+
+## Task 3) For each of the 5Rs discussed in Benureau and Rougier, score on a scale of 0 to 5, your:
+
+### Python implementation
+
+<b>Summary</b>: The implementation iteslf should be very easy to reuse since it has been written as a package with helper functions and no external dependencies. However, the original execution environment for the experiments may be a little difficult to recreate due to the numerous dependencies, and the results of the runtime trial are not possible to replicate. 
+
+- <b> Re-runnable (4)</b>: I wrote a readme describing the environment (python version, package versions) the code was tested in as well as instructions on how to recreate it, although the number of dependencies and the need for a virtual environment makes this a nontrivial task.   
+  
+  
+- <b> Repeatable (4)</b>: I set random seeds where required to ensure the code produces the same output when re-run. A large number of replications was used so that results don't vary too much depending on the seed chosen. The outputs and the original results of the experiments have been saved to pickle files so they can be loaded to check repeatability. Note: this doesn't guarantee repeatability for the execution time test as this depends on factors (e.g. computer specs and internal state) that cannot be consistently replicated.
+  
+  
+- <b> Reproducible (3.5)</b>: The jupyter notebook for the assessment had several dependencies - the exact versions were specified in the readme but as time goes on it may become difficult to retrieve and install the original versions used. The output files contain the random seed and timestamp to facilitate reproducing the results should the code be changed. Supplying the results of the original run means that the figures can be reproduced consistently even for the execution time trial where the results themselves cannot be exactly reproduced. The external dependencies are only used for reading/saving/plotting these results (with only base python libraries used in the implementation itself and in generating the examples), so as long as the python version used is similar, most of the results should be reproducible even if they are not installed.
+  
+  
+- <b> Reusable (5)</b>: The reasoning behind implementation choices made is explained in markdown annotations, with the code commented to make it easier to understand and modify. I tried to write the code simply and use descriptive variable and function names. I also wrote a module implementing the stable marriage problem as a class (with informative error handling and documentation) to make it easier to reuse. The version provided with this assignment contains some additional helper functions for reading and writing preference tables from/to the csv file format, making it easier to use on external data.
+  
+  
+- <b> Replicable (5)</b>: I explained the algorithms used as clearly as possible, presenting the explanation and annotated code side by side in a jupyter notebook to reduce ambiguity, and referenced the textbook containing the full details.
+
+<br />
+
+### C++ implementation
+
+<b>Summary</b>: the C++ implementation is just an implementation of the fundamental algorithm with some predetermined examples for illustration. For this reason it is very easy to run it and produce the same results, but no extra steps have been taken to make it convenient to use for other problems.
+
+- <b> Re-runnable (5)</b>: No prerequisites to install, so it is easy to create an environment where it should run without errors. 
+  
+- <b> Repeatable (5)</b>: There is no randomness in the output since the examples are hard-coded into the scripts and do not depend on external factors.
+  
+- <b> Reproducible (5)</b>: See above.
+  
+- <b> Reusable (2)</b>: Code commented clearly with markdown annotations explaining implementation choices. C++ is less user-friendly than R or python however, and there are no helper functions for input validation/ error handling/ import and export of results. An end user would have to read the documentation to understand the algorithm and the data types the implementation expects in order to handle errors when using/modifying the code.
+  
+- <b> Replicable (5)</b>: The steps of the algorithm are exaplained in the comments and annotations, and a source provided to the textbook containing the full details.
+
+<br />
+
+### R package implementation
+
+<b>Summary</b>: the package is very similar to the one I wrote for the python assignment, and should be very easy to reuse. It has some external dependencies, although these should be installed at the correct versions when the package is installed so no additional effort should be required from the user. The results in this file may be difficult to reproduce, however - runtimes will vary and while the test tables and original results are provided in this repository, reproducing them requires being able to run the python scripts. 
+
+- <b> Re-runnable (4.5)</b>: The dependencies are installed automatically when the package is installed, making it easy to create an environment where the code can be run. Note that the minimum version numbers are specified to avoid conflict with other newer packages, so major changes to the dependencies may make this code unrunnable without user intervention to install the exact versions used in testing.
+  
+- <b> Repeatable (4)</b>: The results of the execution time trial will be slightly different each time, but the results of the original run were saved so that the figures in this document can be consistently reproduced.
+  
+- <b> Reproducible (4)</b>: The figures and examples are reproducible with the data in this repository, although the execution time trial itself cannot be exactly replicated. The correct version of python is also necessary to reproduce the generation of the test tables and the execution time of the python implementation.
+  
+- <b> Reusable (4.5)</b>: The package itself should be easy to reuse as it is extensively documented and has several helper functions to aid reuse, but the fact that it interfaces with C++ will make modifying/understanding the implementation of the fundamental algorithm or calling it directly more difficult. 
+  
+- <b> Replicable (5)</b>: The steps of the algorithm are exaplained in the comments and annotations, and a source provided to the textbook containing the full details.
+
+<br />
+<br />
+
